@@ -25,6 +25,23 @@ export type BackupData = {
   exportedAt: string;
 };
 
+export type BackupFileData = {
+  version: '1.0';
+  exportDate: string;
+  appName: 'OJT Progress Tracker';
+  data: {
+    userProfile: UserProfile | null;
+    logs: DailyLog[];
+  };
+};
+
+export type BackupSummary = {
+  profileName: string | null;
+  targetHours: number | null;
+  logCount: number;
+  exportDate: string;
+};
+
 export type DashboardSummary = {
   totalHours: number;
   remainingHours: number;

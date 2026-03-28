@@ -1,4 +1,4 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { Card, Text, useTheme } from 'react-native-paper';
 
 import { appRadius } from '@/constants/theme';
@@ -6,28 +6,20 @@ import { appRadius } from '@/constants/theme';
 type StatsCardProps = {
   label: string;
   value: string;
-  helper?: string;
 };
 
-export function StatsCard({ label, value, helper }: StatsCardProps) {
+export function StatsCard({ label, value }: StatsCardProps) {
   const theme = useTheme();
 
   return (
     <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
       <Card.Content style={styles.content}>
-        <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+        <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant }}>
           {label}
         </Text>
         <Text variant="headlineSmall" style={styles.value}>
           {value}
         </Text>
-        {helper ? (
-          <View style={styles.helperWrap}>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-              {helper}
-            </Text>
-          </View>
-        ) : null}
       </Card.Content>
     </Card>
   );
@@ -36,16 +28,15 @@ export function StatsCard({ label, value, helper }: StatsCardProps) {
 const styles = StyleSheet.create({
   card: {
     flex: 1,
-    borderRadius: appRadius.lg,
+    borderRadius: 12,
+    elevation: 0,
   },
   content: {
-    minHeight: 132,
+    minHeight: 92,
+    justifyContent: 'center',
+    gap: 6,
   },
   value: {
-    marginTop: 8,
     fontWeight: '800',
-  },
-  helperWrap: {
-    marginTop: 10,
   },
 });

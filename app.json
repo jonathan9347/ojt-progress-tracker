@@ -2,7 +2,7 @@
   "expo": {
     "name": "OJT Progress Tracker",
     "slug": "ojt-progress-tracker",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "scheme": "ojttracker",
@@ -34,6 +34,7 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "expo-dev-client",
       "expo-router",
       [
         "expo-notifications",

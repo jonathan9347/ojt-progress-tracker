@@ -1,4 +1,5 @@
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { useState } from 'react';
+import { LayoutChangeEvent, StyleSheet, View } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { Card, Text, useTheme } from 'react-native-paper';
 
@@ -11,12 +12,17 @@ type ChartProps = {
 
 export function Chart({ labels, values }: ChartProps) {
   const theme = useTheme();
-  const { width: screenWidth } = useWindowDimensions();
-  const width = Math.max(Math.min(screenWidth - 72, 520), 260);
+  const [cardWidth, setCardWidth] = useState(0);
+  const chartWidth = Math.max(cardWidth - 40, 220);
+  const chartHeight = Math.min(Math.max(chartWidth * 0.62, 180), 230);
+
+  const handleLayout = (event: LayoutChangeEvent) => {
+    setCardWidth(event.nativeEvent.layout.width);
+  };
 
   return (
     <Card style={[styles.card, { backgroundColor: theme.colors.surface }]}>
-      <Card.Content>
+      <Card.Content onLayout={handleLayout} style={styles.content}>
         <Text variant="titleMedium" style={styles.title}>
           Last 30 Days
         </Text>
@@ -26,12 +32,15 @@ export function Chart({ labels, values }: ChartProps) {
               labels,
               datasets: [{ data: values.length ? values : [0] }],
             }}
-            width={width}
-            height={220}
+            width={chartWidth}
+            height={chartHeight}
             bezier
             yAxisSuffix="h"
+            withVerticalLines={false}
+            withHorizontalLines
             withInnerLines={false}
             withOuterLines={false}
+            segments={4}
             chartConfig={{
               backgroundGradientFrom: theme.colors.surface,
               backgroundGradientTo: theme.colors.surface,
@@ -57,12 +66,17 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: appRadius.lg,
   },
+  content: {
+    gap: 12,
+  },
   title: {
     fontWeight: '700',
   },
   chartWrap: {
-    marginTop: 12,
-    marginLeft: -22,
+    minHeight: 190,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
   },
   chart: {
     borderRadius: appRadius.md,

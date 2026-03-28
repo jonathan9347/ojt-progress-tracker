@@ -16,25 +16,22 @@ export function LogItem({ log, onPress }: LogItemProps) {
   return (
     <Card style={[styles.card, { backgroundColor: theme.colors.surface }]} mode="contained" onPress={onPress}>
       <Card.Content style={styles.content}>
-        <View style={styles.row}>
-          <View style={styles.dateBadge}>
-            <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-              Logged
-            </Text>
-            <Text variant="titleMedium" style={styles.dateText}>
-              {formatDisplayDate(log.date)}
-            </Text>
-          </View>
-          <Text variant="titleMedium" style={{ color: theme.colors.primary, fontWeight: '800' }}>
-            {log.netHours.toFixed(2)} hrs
+        <View style={styles.leading}>
+          <Text variant="titleMedium" style={styles.dayText}>
+            {formatDisplayDate(log.date)}
+          </Text>
+          <Text numberOfLines={1} variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+            {log.notes || 'No notes added.'}
           </Text>
         </View>
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          Raw {log.hours.toFixed(2)} hrs • Break {log.breakMinutes} min
-        </Text>
-        <Text numberOfLines={2} variant="bodyMedium" style={styles.notes}>
-          {log.notes || 'No notes added.'}
-        </Text>
+        <View style={styles.trailing}>
+          <Text variant="headlineSmall" style={{ color: theme.colors.onSurface, fontWeight: '800' }}>
+            {log.netHours.toFixed(1)}h
+          </Text>
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            Break {log.breakMinutes}m
+          </Text>
+        </View>
       </Card.Content>
     </Card>
   );
@@ -42,24 +39,23 @@ export function LogItem({ log, onPress }: LogItemProps) {
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: appRadius.lg,
+    borderRadius: 14,
   },
   content: {
-    gap: 8,
-  },
-  row: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 16,
+    justifyContent: 'space-between',
+    gap: 12,
   },
-  dateBadge: {
-    flexShrink: 1,
+  leading: {
+    flex: 1,
+    gap: 4,
   },
-  dateText: {
+  trailing: {
+    alignItems: 'flex-end',
+    gap: 2,
+  },
+  dayText: {
     fontWeight: '700',
-  },
-  notes: {
-    marginTop: 4,
   },
 });

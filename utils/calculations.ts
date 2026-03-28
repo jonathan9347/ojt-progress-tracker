@@ -22,6 +22,16 @@ export function calculateNetHours(hours: number, breakMinutes: number): number {
   return clampHours(Math.max(0, hours - breakMinutes / 60));
 }
 
+export function calculateHoursFromTimeRange(timeIn: Date, timeOut: Date): { hours: number; crossesMidnight: boolean } {
+  const crossesMidnight = timeOut.getTime() <= timeIn.getTime();
+  const durationMs = crossesMidnight ? timeOut.getTime() + 24 * 60 * 60 * 1000 - timeIn.getTime() : timeOut.getTime() - timeIn.getTime();
+
+  return {
+    hours: clampHours(durationMs / (60 * 60 * 1000)),
+    crossesMidnight,
+  };
+}
+
 export function sortLogsNewest(logs: DailyLog[]): DailyLog[] {
   return [...logs].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }

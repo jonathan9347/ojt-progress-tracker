@@ -1,26 +1,24 @@
 import { useState } from 'react';
-import { RefreshControl, ScrollView, StyleSheet, View, useWindowDimensions } from 'react-native';
-import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { router } from 'expo-router';
-import { FAB, Surface, Text, useTheme } from 'react-native-paper';
+import { Pressable } from 'react-native';
+import { Button, Surface, Text, useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { Chart } from '@/components/Chart';
 import { EmptyState } from '@/components/EmptyState';
+import { LogItem } from '@/components/LogItem';
 import { ProgressCard } from '@/components/ProgressCard';
 import { StatsCard } from '@/components/StatsCard';
-import { appPalette, appRadius } from '@/constants/theme';
 import { useAppState } from '@/hooks/useAppState';
-import { calculateDashboard, formatDisplayDate, getLastNDaysChartData } from '@/utils/calculations';
+import { triggerSelectionHaptic } from '@/utils/haptics';
+import { calculateDashboard, formatDisplayDate } from '@/utils/calculations';
 
 export default function DashboardScreen() {
   const { profile, logs, refreshData } = useAppState();
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const tabBarHeight = useBottomTabBarHeight();
-  const { width } = useWindowDimensions();
   const [refreshing, setRefreshing] = useState(false);
-  const stackedCards = width < 390;
+  const summary = calculateDashboard(profile, logs);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -28,60 +26,34 @@ export default function DashboardScreen() {
     setRefreshing(false);
   };
 
-  const summary = calculateDashboard(profile, logs);
-  const chart = getLastNDaysChartData(logs, 30);
+  const openLogScreen = async () => {
+    await triggerSelectionHaptic();
+    router.push('/(tabs)/log');
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={[
           styles.content,
           {
-            paddingTop: insets.top + 12,
-            paddingBottom: insets.bottom + 110,
+            paddingTop: insets.top + 10,
+            paddingBottom: insets.bottom + 100,
           },
         ]}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} tintColor={theme.colors.primary} />}
       >
-        <Surface style={[styles.hero, { backgroundColor: theme.colors.surface }]} elevation={0}>
-          <View style={styles.heroHeader}>
-            <View style={styles.heroCopy}>
-              <Text variant="labelLarge" style={[styles.kicker, { color: appPalette.inkSoft }]}>
-                Dashboard
-              </Text>
-              <Text variant="headlineLarge" style={[styles.heroTitle, { color: theme.colors.onSurface }]}>
-                Good day, {profile?.name ?? 'Student'}
-              </Text>
-              <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-                Stay on top of your rendered hours with a clearer progress snapshot and recent pace insights.
-              </Text>
-            </View>
-            <View style={[styles.badge, { backgroundColor: theme.colors.secondaryContainer }]}>
-              <Text variant="labelLarge" style={{ color: theme.colors.onSecondaryContainer }}>
-                {summary.daysUntilDeadline} days left
-              </Text>
-            </View>
+        <View style={styles.header}>
+          <View style={styles.headerCopy}>
+            <Text variant="headlineLarge" style={styles.greeting}>
+              Hello, {profile?.name ?? 'Alex'}
+            </Text>
           </View>
-
-          <View style={[styles.heroFooter, stackedCards && styles.heroFooterStacked]}>
-            <View style={styles.heroMetric}>
-              <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                Deadline
-              </Text>
-              <Text variant="titleMedium" style={styles.heroMetricValue}>
-                {profile?.endDate ? formatDisplayDate(profile.endDate) : 'Not set'}
-              </Text>
-            </View>
-            <View style={[styles.heroMetric, styles.heroMetricHighlight]}>
-              <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                Daily average needed
-              </Text>
-              <Text variant="titleMedium" style={styles.heroMetricValue}>
-                {summary.requiredDailyAverage.toFixed(2)} hrs
-              </Text>
-            </View>
-          </View>
-        </Surface>
+          <Pressable onPress={() => void openLogScreen()} hitSlop={10} style={styles.plusButton}>
+            <Text style={styles.plusSymbol}>+</Text>
+          </Pressable>
+        </View>
 
         <ProgressCard
           completed={summary.totalHours}
@@ -91,49 +63,41 @@ export default function DashboardScreen() {
           status={summary.status}
         />
 
-        <View style={[styles.grid, stackedCards && styles.gridStacked]}>
-          <StatsCard
-            label="Estimated Days Remaining"
-            value={summary.estimatedDaysRemaining === null ? '--' : `${summary.estimatedDaysRemaining}`}
-            helper="Based on your last 14 days"
-          />
-          <StatsCard
-            label="Required Daily Average"
-            value={`${summary.requiredDailyAverage.toFixed(2)} hrs`}
-            helper={`${summary.daysUntilDeadline} days until deadline`}
-          />
+        <View style={styles.statsGrid}>
+          <StatsCard label="Current Streak" value="3d" />
+          <StatsCard label="Avg Daily" value={`${summary.averageDailyHours.toFixed(1)}h`} />
+          <StatsCard label="Days Left" value={`${summary.daysUntilDeadline}d`} />
         </View>
 
-        <View style={[styles.grid, stackedCards && styles.gridStacked]}>
-          <StatsCard
-            label="Projected Finish Date"
-            value={summary.projectedFinishDate ? formatDisplayDate(summary.projectedFinishDate) : '--'}
-            helper="At your current pace"
-          />
-          <StatsCard
-            label="Remaining Hours"
-            value={`${summary.remainingHours.toFixed(2)} hrs`}
-            helper={`${summary.averageDailyHours.toFixed(2)} avg/day lately`}
-          />
+        <Surface style={[styles.motivationCard, { backgroundColor: 'rgba(255,255,255,0.72)' }]} elevation={0}>
+          <Text variant="titleMedium" style={styles.motivationTitle}>
+            You're on track to finish by {summary.projectedFinishDate ? formatDisplayDate(summary.projectedFinishDate) : 'your goal date'}.
+          </Text>
+          <Text variant="bodySmall" style={styles.motivationBody}>
+            Stay consistent and the app will keep refining your pace.
+          </Text>
+        </Surface>
+
+        <View style={styles.sectionHeader}>
+          <Text variant="titleLarge" style={styles.sectionTitle}>
+            Recent Logs
+          </Text>
+          <Button mode="text" compact onPress={() => router.push('/(tabs)/history')}>
+            View All
+          </Button>
         </View>
 
         {logs.length ? (
-          <Chart labels={chart.labels} values={chart.values} />
+          logs.slice(0, 3).map((log) => <LogItem key={log.id} log={log} onPress={() => router.push('/(tabs)/history')} />)
         ) : (
           <EmptyState
             title="No logs yet"
-            description="Start by adding your first rendered hours. Your dashboard stats and chart will appear here."
+            description="Start your first entry to see recent logs and progress updates here."
             actionLabel="Log Hours"
-            onAction={() => router.push('/(tabs)/log')}
+            onAction={() => void openLogScreen()}
           />
         )}
       </ScrollView>
-
-      <FAB
-        icon="plus"
-        style={[styles.fab, { bottom: tabBarHeight + insets.bottom + 12 }]}
-        onPress={() => router.push('/(tabs)/log')}
-      />
     </View>
   );
 }
@@ -144,63 +108,59 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    gap: 18,
+    gap: 16,
   },
-  hero: {
-    borderRadius: appRadius.xl,
-    padding: 22,
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 12,
   },
-  heroHeader: {
-    gap: 18,
+  headerCopy: {
+    flex: 1,
+    gap: 6,
   },
-  heroCopy: {
-    gap: 10,
-  },
-  kicker: {
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    fontWeight: '700',
-  },
-  heroTitle: {
+  greeting: {
     fontWeight: '800',
   },
-  badge: {
+  plusButton: {
     alignSelf: 'flex-start',
-    borderRadius: appRadius.pill,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
-  heroFooter: {
-    marginTop: 20,
+  plusSymbol: {
+    fontSize: 36,
+    lineHeight: 36,
+    fontWeight: '400',
+    color: '#000000',
+  },
+  statsGrid: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
   },
-  heroFooterStacked: {
-    flexDirection: 'column',
+  motivationCard: {
+    borderRadius: 16,
+    padding: 18,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.8)',
+    shadowColor: '#000000',
+    shadowOpacity: 0.06,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 8 },
   },
-  grid: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  gridStacked: {
-    flexDirection: 'column',
-  },
-  heroMetric: {
-    flex: 1,
-    borderRadius: appRadius.lg,
-    backgroundColor: appPalette.surfaceMuted,
-    padding: 14,
-  },
-  heroMetricHighlight: {
-    backgroundColor: '#FFF7E8',
-  },
-  heroMetricValue: {
-    marginTop: 6,
+  motivationTitle: {
     fontWeight: '700',
   },
-  fab: {
-    position: 'absolute',
-    right: 20,
-    backgroundColor: appPalette.info,
+  motivationBody: {
+    color: '#636366',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  sectionTitle: {
+    fontWeight: '800',
   },
 });

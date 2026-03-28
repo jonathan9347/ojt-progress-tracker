@@ -23,10 +23,16 @@ function RootNavigator() {
 
   return (
     <PaperProvider theme={theme}>
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: 'ios_from_right',
+          gestureEnabled: true,
+        }}
+      >
         <Stack.Screen name="index" />
         <Stack.Screen name="onboarding" />
-        <Stack.Screen name="report" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="report" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
         <Stack.Screen name="(tabs)" />
       </Stack>
     </PaperProvider>
