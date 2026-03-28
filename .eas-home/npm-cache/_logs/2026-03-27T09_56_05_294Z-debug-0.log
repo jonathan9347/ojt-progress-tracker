@@ -1,0 +1,18 @@
+0 verbose cli C:\Program Files\nodejs\node.exe c:\Users\prime\Downloads\Project_App\.eas-home\npm\node_modules\npm\bin\npm-cli.js
+1 info using npm@11.12.1
+2 info using node@v22.16.0
+3 silly config load:file:c:\Users\prime\Downloads\Project_App\.eas-home\npm\node_modules\npm\npmrc
+4 silly config load:file:C:\Users\prime\Downloads\Project_App\.npmrc
+5 silly config load:file:C:\Users\prime\.npmrc
+6 silly config load:file:c:\Users\prime\Downloads\Project_App\.eas-home\npm\etc\npmrc
+7 verbose title npm exec expo config --json
+8 verbose argv "exec" "--" "expo" "config" "--json"
+9 verbose logfile logs-max:10 dir:c:\Users\prime\Downloads\Project_App\.eas-home\npm-cache\_logs\2026-03-27T09_56_05_294Z-
+10 verbose logfile c:\Users\prime\Downloads\Project_App\.eas-home\npm-cache\_logs\2026-03-27T09_56_05_294Z-debug-0.log
+11 silly logfile done cleaning log files
+12 verbose cwd C:\Users\prime\Downloads\Project_App
+13 verbose os Windows_NT 10.0.26200
+14 verbose node v22.16.0
+15 verbose npm  v11.12.1
+16 verbose exit 0
+17 info ok
