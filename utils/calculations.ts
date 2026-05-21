@@ -12,6 +12,7 @@ import {
   subDays,
 } from 'date-fns';
 
+import type { DailyLog, DashboardSummary, HistoryFilter, UserProfile } from '@/types';
 
 export function clampHours(value: number): number {
   return Math.round(value * 100) / 100;
